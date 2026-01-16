@@ -76,6 +76,7 @@ class InferenceEngine:
     def __init__(self):
         self.is_running = False
         self.latest_frame = None
+        self.latest_detections = []  # Store latest detection results
         self.rknn = None
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         # 需确保 py_utils 文件夹在 backend 目录下
@@ -149,6 +150,7 @@ class InferenceEngine:
                 f_boxes, f_classes, f_scores = boxes[_pos], classes[_pos], (class_max_score*scores)[_pos]
 
                 # 绘制结果
+                detections = []
                 if len(f_classes) > 0:
                     real_boxes = self.co_helper.get_real_box(f_boxes)
                     # 应用 NMS
@@ -160,6 +162,14 @@ class InferenceEngine:
                         cv2.putText(frame, f'{CLASSES[cl]} {score:.2f}', (top, left - 10),
                                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
+                        # Store detection result
+                        detection = {
+                            "class": CLASSES[cl],
+                            "confidence": float(score),
+                            "bbox": [int(top), int(left), int(right), int(bottom)]
+                        }
+                        detections.append(detection)
+
                     # UDP 数据推送
                     try:
                         msg = pickle.dumps({
@@ -170,6 +180,9 @@ class InferenceEngine:
                         self.sock.sendto(struct.pack('!I', len(msg)) + msg, (udp_host, udp_port))
                     except Exception as e:
                         print(f"Error sending UDP data: {e}")
+
+                # Update latest detections
+                self.latest_detections = detections
             except Exception as e:
                 print(f"Error during post-processing: {e}")
 

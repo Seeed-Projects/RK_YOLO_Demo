@@ -99,6 +99,9 @@ async function handleStart() {
                     statusTag.innerText = "STARTING...";
                     statusTag.className = "text-xs px-2 py-1 rounded bg-yellow-600 font-bold";
 
+                    // Start polling for detection results
+                    startDetectionPolling(config.ip);
+
                     // Set up error handler to fallback to video element if img fails
                     streamImg.onerror = function() {
                         console.warn("Image element failed to load stream, trying video element...");
@@ -158,6 +161,12 @@ async function handleStop() {
 
         setUIState(false);
 
+        // Stop detection polling
+        if (detectionPollingInterval) {
+            clearInterval(detectionPollingInterval);
+            detectionPollingInterval = null;
+        }
+
         // 重置画面
         const streamImg = document.getElementById('video-stream');
         const videoElement = document.getElementById('video-element');
@@ -169,6 +178,10 @@ async function handleStop() {
         streamImg.classList.add('hidden');
         videoElement.classList.add('hidden');
         document.getElementById('loader').classList.remove('hidden');
+
+        // Clear detection results
+        const resultsContainer = document.getElementById('detection-results');
+        resultsContainer.innerHTML = '<p class="text-gray-500 italic">等待检测结果...</p>';
     } catch (err) {
         console.error("Stop command failed:", err);
     }
@@ -234,6 +247,59 @@ async function testVideoStream() {
     } catch (err) {
         console.error("Video stream connection test failed:", err);
     }
+}
+
+// Function to update detection results display
+function updateDetectionResults(results) {
+    const resultsContainer = document.getElementById('detection-results');
+
+    if (!results || results.length === 0) {
+        resultsContainer.innerHTML = '<p class="text-gray-500 italic">无检测结果</p>';
+        return;
+    }
+
+    let html = '';
+    results.forEach(result => {
+        html += `
+            <div class="detection-result-item">
+                <div><span class="detection-class">${result.class}</span>
+                <span class="detection-confidence">置信度: ${(result.confidence * 100).toFixed(2)}%</span></div>
+                <div class="detection-bbox">边界框: [${result.bbox.join(', ')}]</div>
+            </div>
+        `;
+    });
+
+    resultsContainer.innerHTML = html;
+}
+
+// Function to periodically fetch detection results
+let detectionPollingInterval = null;
+
+function startDetectionPolling(ip) {
+    // Clear any existing interval
+    if (detectionPollingInterval) {
+        clearInterval(detectionPollingInterval);
+    }
+
+    // Poll for detection results every 500ms
+    detectionPollingInterval = setInterval(async () => {
+        if (!runningStatus) {
+            // Stop polling if engine is not running
+            clearInterval(detectionPollingInterval);
+            detectionPollingInterval = null;
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://${ip}:5000/api/detection_results`);
+            if (response.ok) {
+                const results = await response.json();
+                updateDetectionResults(results);
+            }
+        } catch (error) {
+            console.error('Error fetching detection results:', error);
+        }
+    }, 500); // Poll every 500ms
 }
 
 // 页面加载完成后自动尝试获取摄像头列表

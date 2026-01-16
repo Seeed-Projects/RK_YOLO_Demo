@@ -4,13 +4,60 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-#video-stream {
-    /* 保持视频比例并防止拉伸 */
-    image-rendering: optimizeSpeed; 
-    object-fit: contain;
+#video-stream, #video-element {
+    /* 使视频完全填充容器，保持宽高比 */
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* 或者使用 cover 如果你想要填满整个区域 */
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
 }
 
 /* 简单的按钮微调 */
 button:active {
     transform: scale(0.98);
+}
+
+/* 视频容器样式 */
+.video-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    background-color: #000;
+}
+
+/* 加载动画居中 */
+.loader-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+}
+
+/* 检测结果样式 */
+.detection-result-item {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    background-color: rgba(30, 41, 59, 0.5); /* slate-800 with opacity */
+    border-radius: 0.25rem;
+}
+
+.detection-class {
+    color: #60a5fa; /* blue-400 */
+    font-weight: bold;
+}
+
+.detection-confidence {
+    color: #34d399; /* emerald-400 */
+}
+
+.detection-bbox {
+    color: #f87171; /* rose-400 */
+    font-family: monospace;
 }

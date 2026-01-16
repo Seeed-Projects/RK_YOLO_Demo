@@ -13,6 +13,7 @@ CORS(app) # 允许前端跨域访问
 
 # Global variables to store the engine and default parameters
 engine = None
+latest_detection_results = []  # Store latest detection results
 default_model_path = "/app/model/yolo11n.rknn"
 default_camera_id = 0
 default_udp_host = "127.0.0.1"
@@ -98,6 +99,15 @@ def video_feed():
                 yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
             time.sleep(0.04)
     return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+# API endpoint to get latest detection results
+@app.route('/api/detection_results')
+def detection_results():
+    global engine
+    if engine:
+        return jsonify(engine.latest_detections)
+    else:
+        return jsonify([])
 
 # backend/app.py 增加设备扫描接口
 @app.route('/api/list_cameras', methods=['GET'])
