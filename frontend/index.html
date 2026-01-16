@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RK3588 NPU 监控终端</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <div class="flex h-screen">
+        <aside class="w-80 bg-gray-800 p-6 flex flex-col shadow-xl">
+            <h1 class="text-2xl font-bold text-blue-400 mb-8 flex items-center">
+                <span class="mr-2">🚀</span> RKNN Server
+            </h1>
+
+            <div class="space-y-6 flex-1">
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-xs text-gray-400 uppercase font-bold">后端 IP 地址</label>
+                        <input type="text" id="server-ip" value="192.168.1.100" 
+                               class="w-full bg-gray-700 border-none rounded p-2 mt-1 focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400 uppercase font-bold">模型文件 (.rknn)</label>
+                        <input type="text" id="model-path" value="/app/model/yolo11n.rknn"
+                               class="w-full bg-gray-700 border-none rounded p-2 mt-1">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-xs text-gray-400 uppercase font-bold">摄像头 ID</label>
+                            <input type="number" id="cam-id" value="0" class="w-full bg-gray-700 border-none rounded p-2 mt-1">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-400 uppercase font-bold">UDP 端口</label>
+                            <input type="number" id="udp-port" value="8080" class="w-full bg-gray-700 border-none rounded p-2 mt-1">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 space-y-3">
+                    <button onclick="handleStart()" id="btn-start"
+                            class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-bold transition">
+                        启动推理任务
+                    </button>
+                    <button onclick="handleStop()" id="btn-stop"
+                            class="w-full bg-red-600 hover:bg-red-500 py-3 rounded-lg font-bold transition">
+                        停止推理
+                    </button>
+                    <button onclick="testVideoStream()"
+                            class="w-full bg-yellow-600 hover:bg-yellow-500 py-2 rounded-lg font-bold transition text-xs">
+                        测试视频流连接
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-auto p-4 bg-gray-900 rounded-lg">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm">运行状态:</span>
+                    <span id="status-tag" class="text-xs px-2 py-1 rounded bg-gray-700">OFFLINE</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 p-8 flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">实时视频流 (NPU 加速)</h2>
+                <div id="fps-counter" class="text-blue-400 font-mono text-sm">Waiting...</div>
+            </div>
+            
+            <div class="flex-1 bg-black rounded-2xl border-4 border-gray-800 relative overflow-hidden flex items-center justify-center">
+                <img id="video-stream" src="" class="max-w-full max-h-full hidden" alt="Stream">
+                <!-- Alternative video element for multipart streams -->
+                <video id="video-element" class="max-w-full max-h-full hidden" autoplay muted playsinline style="width:100%; height:100%; object-fit:contain;">
+                    Your browser does not support the video tag.
+                </video>
+
+                <div id="loader" class="flex flex-col items-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+                    <p class="text-gray-500">等待视频信号...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

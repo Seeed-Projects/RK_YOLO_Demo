@@ -1,0 +1,16 @@
+/* 自定义样式补充 */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#video-stream {
+    /* 保持视频比例并防止拉伸 */
+    image-rendering: optimizeSpeed; 
+    object-fit: contain;
+}
+
+/* 简单的按钮微调 */
+button:active {
+    transform: scale(0.98);
+}
