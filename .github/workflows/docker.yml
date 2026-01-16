@@ -2,12 +2,12 @@ name: Build and Push Docker Image
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
     paths:
       - 'benkend/**'
       - '.github/workflows/docker.yml'
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
     paths:
       - 'benkend/**'
 
