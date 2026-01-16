@@ -43,11 +43,16 @@ COPY requirements.txt .
 # Use --no-cache-dir to keep image small
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the RKNN Toolkit Lite2 wheel
-COPY package/rknn_toolkit_lite2-2.3.2-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl .
+# Copy RKNN Toolkit Lite2 wheel
+COPY package/rknn_toolkit_lite2-2.3.2-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl ./package/
 
-# Install the local wheel
-RUN pip install --no-cache-dir rknn_toolkit_lite2-2.3.2-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
+# Install RKNN Toolkit Lite2 wheel only if on compatible architecture
+RUN if [ "$(dpkg --print-architecture)" = "arm64" ] || [ "$(dpkg --print-architecture)" = "aarch64" ]; then \
+        pip install --no-cache-dir package/rknn_toolkit_lite2-2.3.2-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl; \
+    else \
+        echo "Warning: RKNN toolkit not installed - incompatible architecture $(dpkg --print-architecture)"; \
+        echo "Note: This Docker image will not support hardware acceleration on x86_64 systems"; \
+    fi
 
 # Copy librknnrt.so to /usr/lib/ from src/rk3588
 COPY lib/librknnrt.so /usr/lib/
